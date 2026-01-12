@@ -10,38 +10,38 @@
 	<div id="mainUI">
 		<audio id="music-player"></audio>
 		<div id="downloading">
-			保存文件中......
+			ダウンロード中......
 		</div>
 		<div style="display:flex">
 			<div class="menu">
-				文件
+				file
 				<div>
-					<div id="m-load">加载</div>
-					<div id="m-save">保存到本地（rpe 格式）</div>
-					<div id="m-save2">保存到本地（纯文本多 K 格式）</div>
+					<div id="m-load">アップロード(mp3)</div>
+					<div id="m-save">譜面を保存（rpe形式(.json)）</div>
+					<div id="m-save2">譜面を保存（纯文本多 K 格式(.que)）</div>
 				</div>
 			</div>
 			<div class="menu">
-				填充
+				配置
 				<div>
-					<div id="fillnotes-open">曲线音符</div>
+					<div id="fillnotes-open">曲線ノーツ</div>
 				</div>
 			</div>
 			<div class="menu">
-				编辑
+				編集
 				<div>
-					<div id="m-addline">添加判定线</div>
-					<div id="m-event">打开/关闭事件</div>
-					<div id="m-touch">打开/关闭触控模式</div>
-					<div id="m-player">打开/关闭预览</div>
-					<div id="m-copy">复制模式：内部剪贴板</div>
+					<div id="m-addline">判定線を追加</div>
+					<div id="m-event">イベントタブを開く/閉じる</div>
+					<div id="m-touch">タッチモードon/off</div>
+					<div id="m-player">リアルタイムプレビューon/off</div>
+					<div id="m-copy">コピー</div>
 				</div>
 			</div>
 			<div class="menu">
-				帮助
+				ヘルプ
 				<div>
-					<div id="m-help1">制谱器帮助</div>
-					<div id="m-help2">pez打包帮助</div>
+					<div id="m-help1">譜面制作</div>
+					<div id="m-help2">pez制作</div>
 				</div>
 			</div>
 		</div>
@@ -73,34 +73,34 @@
 					<div style="margin-left: auto; display:flex">
 						<img src="img/icon1.svg" style="height: 100%;" id="mobile-phone-play">
 						<div style="background: rgb(147, 147, 147); text-align:'center'; padding: 10px; margin-left: 3px; user-select: none;"
-							id="mobile-phone-delete">删除</div>
+							id="mobile-phone-delete">削除</div>
 					</div>
 				</div>
 				<canvas id="cvs" width="1600px" height="900px" style="width: 100%;">
 				</canvas>
 			</div>
 			<div style="width: 25%; display:none" id="edit">
-				<h3>音符编辑</h3>
-				X坐标：<input id="edit-x" type="number"><br>
-				起始时间：<input id="edit-time"><br>
-				结束时间：<input id="edit-time2"><br>
-				朝向：<select id="edit-d">
+				<h3>ノーツ編集</h3>
+				X座標：<input id="edit-x" type="number"><br>
+				開始時間：<input id="edit-time"><br>
+				終了時間：<input id="edit-time2"><br>
+				方向：<select id="edit-d">
 					<option value="1">Up</option>
 					<option value="2">Down</option>
 				</select>
 				<br>
-				真值：<select id="edit-t">
-					<option value="0">普通音符</option>
-					<option value="1">假音符</option>
+				fake：<select id="edit-t">
+					<option value="0">real</option>
+					<option value="1">fake</option>
 				</select>
 				<br>
-				Y轴偏移：<input id="edit-y" type="number"><br>
-				可视时间：<input id="edit-visibleTime" type="number"><br>
+				y軸offset：<input id="edit-y" type="number"><br>
+				可視時間：<input id="edit-visibleTime" type="number"><br>
 			</div>
 			<div style="width: 25%; display:none" id="edit2">
-				<h3>事件编辑</h3>
+				<h3>イベント編集</h3>
 				<p id="event-name"></p>
-				缓动类型：<select id="edit2-ease">
+				easing：<select id="edit2-ease">
 					<option value="1">1 linear</option>
 					<option value="2">2 sin out</option>
 					<option value="3">3 sin in</option>
@@ -131,15 +131,15 @@
 					<option value="28">28 bounce io</option>
 				</select>
 				<br>
-				起始时间：<input id="edit2-time"><br>
-				结束时间：<input id="edit2-time2"><br>
-				起始值：<input id="edit2-st"><br>
-				结束值：<input id="edit2-ed"><br>
+				開始時間：<input id="edit2-time"><br>
+				終了時間：<input id="edit2-time2"><br>
+				開始值：<input id="edit2-st"><br>
+				終了值：<input id="edit2-ed"><br>
 			</div>
 			<div style="width: 25%; display:block" id="edit3">
-				<h3>判定线编辑</h3>
+				<h3>判定線編集</h3>
 				名称：<input id="edit3-name"><br>
-				父线：<input id="edit3-fa" type="number"><br>
+				親ライン：<input id="edit3-fa" type="number"><br>
 				bpm倍率：<input id="edit3-bpmfactor" type="number"><br>
 			</div>
 			<div style="width: 25%; display:none" id="edit4">
@@ -147,9 +147,9 @@
 				数值种类：
 				<select id="edit4-t">
 					<option value="positionX">X</option>
-					<option value="startTime">起始时间</option>
-					<option value="endTime">结束时间</option>
-					<option value="yOffset">Y轴偏移</option>
+					<option value="startTime">開始時間</option>
+					<option value="endTime">終了時間</option>
+					<option value="yOffset">y軸推移</option>
 					<option value="line">所在判定线（只支持“设为此值”）</option>
 				</select><br>
 				数值下界：<input id="edit4-v1"><br>
@@ -216,7 +216,7 @@
 			<h2 style="margin-top:0px; margin-left:5px;">曲线填充音符</h2>
 			测试功能<br><br>
 			<button class="close-btn" onclick="this.parentNode.parentNode.style.display='none'">&times;</button>
-			起始时间：<input id="fillnotes-time"><br>
+			開始時間：<input id="fillnotes-time"><br>
 			结束时间：<input id="fillnotes-time2"><br>
 			<input type="checkbox" id="fillnotes-flag">包含边界<br>
 			x 起点<input id="fillnotes-x"><br>
