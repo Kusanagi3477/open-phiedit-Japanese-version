@@ -4,6 +4,7 @@
 # open-phiedit japanese version
 
 [cbs001](https://github.com/cbs001)様の[open phiedit](https://github.com/cbs001/open-phiedit)を一部日本語化させていただきました。
+
 非常简洁的开源制谱器。
 
 正在测试中，bug 很多。欢迎其它人 fork 此仓库。
