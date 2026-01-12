@@ -798,70 +798,78 @@ $("m-load").addEventListener('click', () => {
 		}
 	};
 });
-$("m-save").addEventListener('click', () => {
-	if (in_download == 0) {
-		in_download = 1;
-		$("downloading").style.display = "block";
-		setTimeout(() => {
-			for (let i = 0; i < all_data.judgeLineList.length; i++) {
-				if (all_data.judgeLineList[i].notes == undefined) all_data.judgeLineList[i].numOfNotes = 0;
-				else all_data.judgeLineList[i].numOfNotes = all_data.judgeLineList[i].notes.length;
-			}
+$("m-save").addEventListener("click", () => {
+  if (in_download) return;
+  in_download = 1;
+  $("downloading").style.display = "block";
 
-			if (window.showSaveFilePicker == undefined) {
-				for (let i = 0; i < all_data.judgeLineList.length; i++) {
-					for (let j = 0; j < all_data.judgeLineList[i].notes.length; j++) {
-						all_data.judgeLineList[i].notes[j] = note_extract(all_data.judgeLineList[i].notes[j]);
-					}
-				}
-				FileDownload(JSON.stringify(all_data), "chart.json");
-			} else {
-				// 流式保存
-				window.showSaveFilePicker({ suggestedName: "chart.json" })
-					.then(handle => handle.createWritable())
-					.then(stream => {
-						// console.log(stream);
-						let cache = "";
-						large_json_stringify(all_data, (s) => {
-							if (cache.length + s.length <= 1e7) cache += s;
-							else stream.write(cache), cache = s;
-						});
-						stream.write(cache);
-						stream.close();
-					});
-			}
-			in_download = 0;
-			$("downloading").style.display = "none";
-		}, 0);
-	}
+  setTimeout(() => {
+    for (let i = 0; i < all_data.judgeLineList.length; i++) {
+      const line = all_data.judgeLineList[i];
+      line.numOfNotes = line.notes ? line.notes.length : 0;
+
+      if (line.notes) {
+        for (let j = 0; j < line.notes.length; j++) {
+          line.notes[j] = note_extract(line.notes[j]);
+        }
+      }
+    }
+
+    FileDownload(JSON.stringify(all_data), "chart.json");
+
+    in_download = 0;
+    $("downloading").style.display = "none";
+  }, 0);
 });
-$("m-save2").addEventListener('click', () => {
-	if (in_download == 0) {
-		in_download = 1;
-		$("downloading").style.display = "block";
-		let n = 0, que = [];
-		for (let i = 0; i < all_data.judgeLineList.length; i++) {
-			n += all_data.judgeLineList[i].notes.length;
-		}
-		for (let i = 0; i < all_data.judgeLineList.length; i++) {
-			for (let j = 0; j < all_data.judgeLineList[i].notes.length; j++) {
-				let tmp = note_extract(all_data.judgeLineList[i].notes[j]);
-				let a = {};
-				if (tmp.type == 1 || tmp.type == 3) a.type = 1;
-				else if (tmp.type == 4) a.type = 2;
-				else a.type = 3;
-				a.st = Math.round(((tmp.startTime[0] + tmp.startTime[1] / tmp.startTime[2]) / (bpm / 60)) * 66.6);
-				a.x = Math.round((tmp.positionX + 675) / (1350 / shu)) + 1;
-				a.speed = 50;
-				a.ed = Math.round(((tmp.endTime[0] + tmp.endTime[1] / tmp.endTime[2]) / (bpm / 60)) * 66.6);
-				que.push(a);
-			}
-		}
-		que.sort((a, b) => a.st - b.st);
-		let str = n + "\n";
-		for (let i = 0; i < que.length; i++) str += que[i].type + " " + que[i].st + " " + que[i].speed + (que[i].type == 3 ? " " + (que[i].ed - que[i].st) : "") + " " + que[i].x + "\n";
-		FileDownload(str, "chart.que");
-		in_download = 0;
-		$("downloading").style.display = "none";
-	}
+$("m-save2").addEventListener("click", () => {
+  if (in_download) return;
+  in_download = 1;
+  $("downloading").style.display = "block";
+
+  let que = [];
+  let n = 0;
+
+  for (const line of all_data.judgeLineList) {
+    n += line.notes.length;
+    for (const note of line.notes) {
+      const tmp = note_extract(note);
+      const a = {};
+
+      a.type = tmp.type === 1 || tmp.type === 3 ? 1 : tmp.type === 4 ? 2 : 3;
+
+      a.st = Math.round(
+        ((tmp.startTime[0] + tmp.startTime[1] / tmp.startTime[2]) /
+          (bpm / 60)) *
+          66.6
+      );
+      a.ed = Math.round(
+        ((tmp.endTime[0] + tmp.endTime[1] / tmp.endTime[2]) / (bpm / 60)) * 66.6
+      );
+      a.x = Math.round((tmp.positionX + 675) / (1350 / shu)) + 1;
+      a.speed = 50;
+
+      que.push(a);
+    }
+  }
+
+  que.sort((a, b) => a.st - b.st);
+
+  let str = n + "\n";
+  for (const q of que) {
+    str +=
+      q.type +
+      " " +
+      q.st +
+      " " +
+      q.speed +
+      (q.type === 3 ? " " + (q.ed - q.st) : "") +
+      " " +
+      q.x +
+      "\n";
+  }
+
+  FileDownload(str, "chart.que");
+
+  in_download = 0;
+  $("downloading").style.display = "none";
 });
