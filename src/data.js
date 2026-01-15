@@ -859,23 +859,19 @@ $("m-save").addEventListener("click", () => {
   in_download = 1;
   $("downloading").style.display = "block";
 
-  setTimeout(() => {
-    for (let i = 0; i < all_data.judgeLineList.length; i++) {
-      const line = all_data.judgeLineList[i];
-      line.numOfNotes = line.notes ? line.notes.length : 0;
+  const saveData = JSON.parse(JSON.stringify(all_data));
 
-      if (line.notes) {
-        for (let j = 0; j < line.notes.length; j++) {
-          line.notes[j] = note_extract(line.notes[j]);
-        }
-      }
+  for (const line of saveData.judgeLineList) {
+    line.numOfNotes = line.notes ? line.notes.length : 0;
+    if (line.notes) {
+      line.notes = line.notes.map(n => note_extract(n));
     }
+  }
 
-    FileDownload(JSON.stringify(all_data), "chart.json");
+  FileDownload(JSON.stringify(saveData), "chart.json");
 
-    in_download = 0;
-    $("downloading").style.display = "none";
-  }, 0);
+  in_download = 0;
+  $("downloading").style.display = "none";
 });
 $("m-save2").addEventListener("click", () => {
   if (in_download) return;
@@ -886,20 +882,21 @@ $("m-save2").addEventListener("click", () => {
   let n = 0;
 
   for (const line of all_data.judgeLineList) {
+    if (!line.notes) continue;
+
     n += line.notes.length;
     for (const note of line.notes) {
       const tmp = note_extract(note);
       const a = {};
 
       a.type = tmp.type === 1 || tmp.type === 3 ? 1 : tmp.type === 4 ? 2 : 3;
-
       a.st = Math.round(
         ((tmp.startTime[0] + tmp.startTime[1] / tmp.startTime[2]) /
-          (bpm / 60)) *
-          66.6
+          (bpm / 60)) * 66.6
       );
       a.ed = Math.round(
-        ((tmp.endTime[0] + tmp.endTime[1] / tmp.endTime[2]) / (bpm / 60)) * 66.6
+        ((tmp.endTime[0] + tmp.endTime[1] / tmp.endTime[2]) /
+          (bpm / 60)) * 66.6
       );
       a.x = Math.round((tmp.positionX + 675) / (1350 / shu)) + 1;
       a.speed = 50;
@@ -923,6 +920,7 @@ $("m-save2").addEventListener("click", () => {
       q.x +
       "\n";
   }
+
 
   FileDownload(str, "chart.que");
 
