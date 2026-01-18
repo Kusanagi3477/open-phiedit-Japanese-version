@@ -1,493 +1,552 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no"
+    />
+    <title>open phiedit 5</title>
+  </head>
+  <body>
+    <div id="mainUI">
+      <audio id="music-player"></audio>
+      <div id="downloading">ダウンロード中......</div>
+      <div style="display: flex">
+        <div class="menu">
+          file
+          <div>
+            <div id="m-load">アップロード(mp3)</div>
+            <div id="m-save">譜面を保存（rpe形式(.json)）</div>
+            <div id="m-save2">譜面を保存（纯文本多 K 格式(.que)）</div>
+          </div>
+        </div>
+        <div class="menu">
+          配置
+          <div>
+            <div id="fillnotes-open">曲線ノーツ</div>
+          </div>
+        </div>
+        <div class="menu">
+          編集
+          <div>
+            <div id="m-addline">判定線を追加</div>
+            <div id="m-event">イベントタブを開く/閉じる</div>
+            <div id="m-touch">タッチモードon/off</div>
+            <div id="m-player">リアルタイムプレビューon/off</div>
+            <div id="m-copy">コピー</div>
+          </div>
+        </div>
+        <div class="menu">
+          ヘルプ
+          <div>
+            <div id="m-help1">譜面制作</div>
+            <div id="m-help2">pez制作</div>
+          </div>
+        </div>
+      </div>
+      <!-- 操作栏 -->
+      <div style="display: flex">
+        <!-- 判定线选择 -->
+        <div id="line-selector">
+          <div id="line-selected"></div>
+          <ul id="lines" style="width: 30%; display: none"></ul>
+        </div>
+        <span style="-webkit-user-select: none; user-select: none">&nbsp;</span>
+        <!-- 事件层级选择 -->
+        <div style="display: flex">
+          <div id="eventlayer-ex" class="eventlayer-btn">ex</div>
+          <!-- 动态扩展的容器 -->
+          <div id="eventlayer-con" style="display: flex"></div>
+          <div id="eventlayer-add" class="eventlayer-btn">+</div>
+          <div id="eventlayer-del" class="eventlayer-btn">-</div>
+        </div>
+      </div>
+      <div style="display: flex">
+        <div style="border: 1px solid black; width: 72%">
+          <div id="mode" style="display: flex">
+            <img src="img/1.svg" style="height: 100%" />
+            <img src="img/2.svg" style="height: 100%" />
+            <img src="img/3.svg" style="height: 100%" />
+            <img src="img/4.svg" style="height: 100%" />
+            <img src="img/5.svg" style="height: 100%" />
+            <div style="margin-left: auto; display: flex">
+              <img
+                src="img/icon1.svg"
+                style="height: 100%"
+                id="mobile-phone-play"
+              />
+              <div
+                style="
+                  background: rgb(147, 147, 147);
+                  text-align: &quot;center&quot;;
+                  padding: 10px;
+                  margin-left: 3px;
+                  user-select: none;
+                "
+                id="mobile-phone-delete"
+              >
+                削除
+              </div>
+            </div>
+          </div>
+          <canvas id="cvs" width="1600px" height="900px" style="width: 100%">
+          </canvas>
+        </div>
+        <div style="width: 25%; display: none" id="edit">
+          <h3>ノーツ編集</h3>
+          X座標：<input id="edit-x" type="number" /><br />
+          開始時間：<input id="edit-time" /><br />
+          終了時間：<input id="edit-time2" /><br />
+          方向：<select id="edit-d">
+            <option value="1">Up</option>
+            <option value="2">Down</option>
+          </select>
+          <br />
+          fake：<select id="edit-t">
+            <option value="0">real</option>
+            <option value="1">fake</option>
+          </select>
+          <br />
+          y軸offset：<input id="edit-y" type="number" /><br />
+          可視時間：<input id="edit-visibleTime" type="number" /><br />
+        </div>
+        <div style="width: 25%; display: none" id="edit2">
+          <h3>イベント編集</h3>
+          <p id="event-name"></p>
+          easing：<select id="edit2-ease">
+            <option value="1">1 linear</option>
+            <option value="2">2 sin out</option>
+            <option value="3">3 sin in</option>
+            <option value="4">4 quad out</option>
+            <option value="5">5 quad in</option>
+            <option value="6">6 sin io</option>
+            <option value="7">7 quad io</option>
+            <option value="8">8 cubic out</option>
+            <option value="9">9 cubic in</option>
+            <option value="10">10 quart out</option>
+            <option value="11">11 quart in</option>
+            <option value="12">12 cubic io</option>
+            <option value="13">13 quart io</option>
+            <option value="14">14 quint out</option>
+            <option value="15">15 quint in</option>
+            <option value="16">16 expo out</option>
+            <option value="17">17 expo in</option>
+            <option value="18">18 circ out</option>
+            <option value="19">19 circ in</option>
+            <option value="20">20 back out</option>
+            <option value="21">21 back in</option>
+            <option value="22">22 circ in</option>
+            <option value="23">23 back io</option>
+            <option value="24">24 elastic out</option>
+            <option value="25">25 elastic in</option>
+            <option value="26">26 bounce out</option>
+            <option value="27">27 bounce in</option>
+            <option value="28">28 bounce io</option>
+          </select>
+          <br />
+          開始時間：<input id="edit2-time" /><br />
+          終了時間：<input id="edit2-time2" /><br />
+          開始值：<input id="edit2-st" /><br />
+          終了值：<input id="edit2-ed" /><br />
+        </div>
+        <div style="width: 25%; display: block" id="edit3">
+          <h3>判定線編集</h3>
+          名称：<input id="edit3-name" /><br />
+          親ライン：<input id="edit3-fa" type="number" /><br />
+          bpm倍率：<input id="edit3-bpmfactor" type="number" /><br />
+        </div>
+        <div style="width: 25%; display: none" id="edit4">
+          <h3>ノーツ編集</h3>
+          数値：
+          <select id="edit4-t">
+            <option value="positionX">X</option>
+            <option value="startTime">開始時間</option>
+            <option value="endTime">終了時間</option>
+            <option value="yOffset">y軸推移</option>
+            <option value="line">所在判定线（只支持“设为此值”）</option></select
+          ><br />
+          数值下界：<input id="edit4-v1" /><br />
+          数值上界：<input id="edit4-v2" /><br />
+          缓动类型：<select id="edit4-ease">
+            <option value="1">1 linear</option>
+            <option value="2">2 sin out</option>
+            <option value="3">3 sin in</option>
+            <option value="4">4 quad out</option>
+            <option value="5">5 quad in</option>
+            <option value="6">6 sin io</option>
+            <option value="7">7 quad io</option>
+            <option value="8">8 cubic out</option>
+            <option value="9">9 cubic in</option>
+            <option value="10">10 quart out</option>
+            <option value="11">11 quart in</option>
+            <option value="12">12 cubic io</option>
+            <option value="13">13 quart io</option>
+            <option value="14">14 quint out</option>
+            <option value="15">15 quint in</option>
+            <option value="16">16 expo out</option>
+            <option value="17">17 expo in</option>
+            <option value="18">18 circ out</option>
+            <option value="19">19 circ in</option>
+            <option value="20">20 back out</option>
+            <option value="21">21 back in</option>
+            <option value="22">22 circ in</option>
+            <option value="23">23 back io</option>
+            <option value="24">24 elastic out</option>
+            <option value="25">25 elastic in</option>
+            <option value="26">26 bounce out</option>
+            <option value="27">27 bounce in</option>
+            <option value="28">28 bounce io</option>
+          </select>
+          <br />
+          修改方式：<select id="edit4-op">
+            <option value="add">增加此值</option>
+            <option value="set">设为此值</option>
+            <option value="mul">乘以此值</option>
+            <option value="max">取最大</option>
+            <option value="min">取最小</option>
+            <option value="flip">以此值为中心翻转</option>
+          </select>
+          <br />
+          周期数列：<input id="edit4-cycle" value="1" />
+          <br />
+          扰动：<input id="edit4-rand" type="number" value="0" /><br />
+          <button id="edit4-impl">执行</button>
+        </div>
+      </div>
+      <div style="display: flex">
+        bpm：
+        <div
+          id="s-bpm"
+          style="
+            border: 1px solid;
+            padding: 3px;
+            user-select: none;
+            background: #eee;
+          "
+        >
+          80
+        </div>
+        &nbsp; 縦の格子数：
+        <input value="1" type="number" id="s-shu" style="width: 100px" />
+        &nbsp; 横の格子数：
+        <input value="1" type="number" id="s-heng" style="width: 100px" />
+      </div>
 
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-	<title>open phiedit 5</title>
-</head>
-<body>
-	<div id="mainUI">
-		<audio id="music-player"></audio>
-		<div id="downloading">
-			ダウンロード中......
-		</div>
-		<div style="display:flex">
-			<div class="menu">
-				file
-				<div>
-					<div id="m-load">アップロード(mp3)</div>
-					<div id="m-save">譜面を保存（rpe形式(.json)）</div>
-					<div id="m-save2">譜面を保存（纯文本多 K 格式(.que)）</div>
-				</div>
-			</div>
-			<div class="menu">
-				配置
-				<div>
-					<div id="fillnotes-open">曲線ノーツ</div>
-				</div>
-			</div>
-			<div class="menu">
-				編集
-				<div>
-					<div id="m-addline">判定線を追加</div>
-					<div id="m-event">イベントタブを開く/閉じる</div>
-					<div id="m-touch">タッチモードon/off</div>
-					<div id="m-player">リアルタイムプレビューon/off</div>
-					<div id="m-copy">コピー</div>
-				</div>
-			</div>
-			<div class="menu">
-				ヘルプ
-				<div>
-					<div id="m-help1">譜面制作</div>
-					<div id="m-help2">pez制作</div>
-				</div>
-			</div>
-		</div>
-		<!-- 操作栏 -->
-		<div style="display:flex">
-			<!-- 判定线选择 -->
-			<div id="line-selector">
-				<div id="line-selected"></div>
-				<ul id="lines" style="width: 30%; display: none"></ul>
-			</div>
-			<span style="-webkit-user-select: none; user-select: none;">&nbsp;</span>
-			<!-- 事件层级选择 -->
-			<div style="display:flex">
-				<div id="eventlayer-ex" class="eventlayer-btn">ex</div>
-				<!-- 动态扩展的容器 -->
-				<div id="eventlayer-con" style="display:flex"></div>
-				<div id="eventlayer-add" class="eventlayer-btn">+</div>
-				<div id="eventlayer-del" class="eventlayer-btn">-</div>
-			</div>
-		</div>
-		<div style="display:flex">
-			<div style="border: 1px solid black; width: 72%;">
-				<div id="mode" style="display:flex">
-					<img src="img/1.svg" style="height: 100%;">
-					<img src="img/2.svg" style="height: 100%;">
-					<img src="img/3.svg" style="height: 100%;">
-					<img src="img/4.svg" style="height: 100%;">
-					<img src="img/5.svg" style="height: 100%;">
-					<div style="margin-left: auto; display:flex">
-						<img src="img/icon1.svg" style="height: 100%;" id="mobile-phone-play">
-						<div style="background: rgb(147, 147, 147); text-align:'center'; padding: 10px; margin-left: 3px; user-select: none;"
-							id="mobile-phone-delete">削除</div>
-					</div>
-				</div>
-				<canvas id="cvs" width="1600px" height="900px" style="width: 100%;">
-				</canvas>
-			</div>
-			<div style="width: 25%; display:none" id="edit">
-				<h3>ノーツ編集</h3>
-				X座標：<input id="edit-x" type="number"><br>
-				開始時間：<input id="edit-time"><br>
-				終了時間：<input id="edit-time2"><br>
-				方向：<select id="edit-d">
-					<option value="1">Up</option>
-					<option value="2">Down</option>
-				</select>
-				<br>
-				fake：<select id="edit-t">
-					<option value="0">real</option>
-					<option value="1">fake</option>
-				</select>
-				<br>
-				y軸offset：<input id="edit-y" type="number"><br>
-				可視時間：<input id="edit-visibleTime" type="number"><br>
-			</div>
-			<div style="width: 25%; display:none" id="edit2">
-				<h3>イベント編集</h3>
-				<p id="event-name"></p>
-				easing：<select id="edit2-ease">
-					<option value="1">1 linear</option>
-					<option value="2">2 sin out</option>
-					<option value="3">3 sin in</option>
-					<option value="4">4 quad out</option>
-					<option value="5">5 quad in</option>
-					<option value="6">6 sin io</option>
-					<option value="7">7 quad io</option>
-					<option value="8">8 cubic out</option>
-					<option value="9">9 cubic in</option>
-					<option value="10">10 quart out</option>
-					<option value="11">11 quart in</option>
-					<option value="12">12 cubic io</option>
-					<option value="13">13 quart io</option>
-					<option value="14">14 quint out</option>
-					<option value="15">15 quint in</option>
-					<option value="16">16 expo out</option>
-					<option value="17">17 expo in</option>
-					<option value="18">18 circ out</option>
-					<option value="19">19 circ in</option>
-					<option value="20">20 back out</option>
-					<option value="21">21 back in</option>
-					<option value="22">22 circ in</option>
-					<option value="23">23 back io</option>
-					<option value="24">24 elastic out</option>
-					<option value="25">25 elastic in</option>
-					<option value="26">26 bounce out</option>
-					<option value="27">27 bounce in</option>
-					<option value="28">28 bounce io</option>
-				</select>
-				<br>
-				開始時間：<input id="edit2-time"><br>
-				終了時間：<input id="edit2-time2"><br>
-				開始值：<input id="edit2-st"><br>
-				終了值：<input id="edit2-ed"><br>
-			</div>
-			<div style="width: 25%; display:block" id="edit3">
-				<h3>判定線編集</h3>
-				名称：<input id="edit3-name"><br>
-				親ライン：<input id="edit3-fa" type="number"><br>
-				bpm倍率：<input id="edit3-bpmfactor" type="number"><br>
-			</div>
-			<div style="width: 25%; display:none" id="edit4">
-				<h3>音符批量编辑</h3>
-				数值种类：
-				<select id="edit4-t">
-					<option value="positionX">X</option>
-					<option value="startTime">開始時間</option>
-					<option value="endTime">終了時間</option>
-					<option value="yOffset">y軸推移</option>
-					<option value="line">所在判定线（只支持“设为此值”）</option>
-				</select><br>
-				数值下界：<input id="edit4-v1"><br>
-				数值上界：<input id="edit4-v2"><br>
-				缓动类型：<select id="edit4-ease">
-					<option value="1">1 linear</option>
-					<option value="2">2 sin out</option>
-					<option value="3">3 sin in</option>
-					<option value="4">4 quad out</option>
-					<option value="5">5 quad in</option>
-					<option value="6">6 sin io</option>
-					<option value="7">7 quad io</option>
-					<option value="8">8 cubic out</option>
-					<option value="9">9 cubic in</option>
-					<option value="10">10 quart out</option>
-					<option value="11">11 quart in</option>
-					<option value="12">12 cubic io</option>
-					<option value="13">13 quart io</option>
-					<option value="14">14 quint out</option>
-					<option value="15">15 quint in</option>
-					<option value="16">16 expo out</option>
-					<option value="17">17 expo in</option>
-					<option value="18">18 circ out</option>
-					<option value="19">19 circ in</option>
-					<option value="20">20 back out</option>
-					<option value="21">21 back in</option>
-					<option value="22">22 circ in</option>
-					<option value="23">23 back io</option>
-					<option value="24">24 elastic out</option>
-					<option value="25">25 elastic in</option>
-					<option value="26">26 bounce out</option>
-					<option value="27">27 bounce in</option>
-					<option value="28">28 bounce io</option>
-				</select>
-				<br>
-				修改方式：<select id="edit4-op">
-					<option value="add">增加此值</option>
-					<option value="set">设为此值</option>
-					<option value="mul">乘以此值</option>
-					<option value="max">取最大</option>
-					<option value="min">取最小</option>
-					<option value="flip">以此值为中心翻转</option>
-				</select>
-				<br>
-				周期数列：<input id="edit4-cycle" value="1">
-				<br>
-				扰动：<input id="edit4-rand" type="number" value="0"><br>
-				<button id="edit4-impl">执行</button>
-			</div>
-		</div>
-		<div style="display:flex">
-			bpm：
-			<div id="s-bpm" style="border: 1px solid; padding: 3px; user-select: none; background: #EEE;">80</div>
-			&nbsp;
-			竖向格子数：
-			<input value="1" type="number" id="s-shu" style="width: 100px">
-			&nbsp;
-			横向格子数：
-			<input value="1" type="number" id="s-heng" style="width: 100px">
-		</div>
-	</div>
-	<div class="window" id="window-fillnotes">
-		<div class="content">
-			<h2 style="margin-top:0px; margin-left:5px;">曲线填充音符</h2>
-			测试功能<br><br>
-			<button class="close-btn" onclick="this.parentNode.parentNode.style.display='none'">&times;</button>
-			開始時間：<input id="fillnotes-time"><br>
-			结束时间：<input id="fillnotes-time2"><br>
-			<input type="checkbox" id="fillnotes-flag">包含边界<br>
-			x 起点<input id="fillnotes-x"><br>
-			x 终点：<input id="fillnotes-x2"><br>
-			填充：<select id="fillnotes-t">
-				<option value="1">tap</option>
-				<option value="3">flick</option>
-				<option value="4" selected>drag</option>
-			</select><br>
-			密度：<input id="fillnotes-density" value="0:1/4"><br>
-			曲线类型：<select id="fillnotes-ease">
-				<option value="1">1 linear</option>
-				<option value="2">2 sin out</option>
-				<option value="3">3 sin in</option>
-				<option value="4">4 quad out</option>
-				<option value="5">5 quad in</option>
-				<option value="6">6 sin io</option>
-				<option value="7">7 quad io</option>
-				<option value="8">8 cubic out</option>
-				<option value="9">9 cubic in</option>
-				<option value="10">10 quart out</option>
-				<option value="11">11 quart in</option>
-				<option value="12">12 cubic io</option>
-				<option value="13">13 quart io</option>
-				<option value="14">14 quint out</option>
-				<option value="15">15 quint in</option>
-				<option value="16">16 expo out</option>
-				<option value="17">17 expo in</option>
-				<option value="18">18 circ out</option>
-				<option value="19">19 circ in</option>
-				<option value="20">20 back out</option>
-				<option value="21">21 back in</option>
-				<option value="22">22 circ in</option>
-				<option value="23">23 back io</option>
-				<option value="24">24 elastic out</option>
-				<option value="25">25 elastic in</option>
-				<option value="26">26 bounce out</option>
-				<option value="27">27 bounce in</option>
-				<option value="28">28 bounce io</option>
-			</select><br>
-			<button id="fillnotes">确认</button>
-		</div>
-	</div>
-	<div class="window" id="window-bpmlist">
-		<div class="content" style="overflow-y: auto;">
-			<h2 style="margin-top:0px; margin-left:5px;">BPM 管理</h2>
-			<button class="close-btn" onclick="this.parentNode.parentNode.style.display='none'">&times;</button>
-			<div id="bpmlist">
+      <!-- 2段目：譜面情報 -->
+      <div style="display: flex; margin-top: 8px">
+        譜面名：
+        <input value="" type="text" id="chart-name" style="width: 100px" />
+        &nbsp; 譜面製作者：
+        <input value="" type="text" id="charter-name" style="width: 100px" />
+        &nbsp; 作曲者名：
+        <input value="" type="text" id="composer-name" style="width: 100px" />
+        &nbsp; イラスト：
+        <input
+          value=""
+          type="text"
+          id="illustration-name"
+          style="width: 100px"
+        />
+        &nbsp; レベル：
+        <input value="" type="text" id="level" style="width: 100px" />
+      </div>
 
-			</div>
-			<button id="bpmlist-add">添加</button>
-		</div>
-	</div>
-	<div class="window" id="window-help">
-		<div class="content" style="overflow-y: auto;">
-			<h2 style="margin-top:0px; margin-left:5px;">帮助页面</h2>
-			<button class="close-btn" onclick="this.parentNode.parentNode.style.display='none'">&times;</button>
-			<div id="help-content">
+      <div style="display: flex; margin-top: 4px">
+        音源：
+        <input value="" type="text" id="song-name" style="width: 100px" />
+        &nbsp; 背景：
+        <input value="" type="text" id="background-name" style="width: 100px" />
+        &nbsp; id：
+        <input value="" type="number" id="chart-id" style="width: 100px" />
+      </div>
+    </div>
+    <div class="window" id="window-fillnotes">
+      <div class="content">
+        <h2 style="margin-top: 0px; margin-left: 5px">曲线填充音符</h2>
+        测试功能<br /><br />
+        <button
+          class="close-btn"
+          onclick="this.parentNode.parentNode.style.display = 'none'"
+        >
+          &times;
+        </button>
+        開始時間：<input id="fillnotes-time" /><br />
+        结束时间：<input id="fillnotes-time2" /><br />
+        <input type="checkbox" id="fillnotes-flag" />包含边界<br />
+        x 起点<input id="fillnotes-x" /><br />
+        x 终点：<input id="fillnotes-x2" /><br />
+        填充：<select id="fillnotes-t">
+          <option value="1">tap</option>
+          <option value="3">flick</option>
+          <option value="4" selected>drag</option></select
+        ><br />
+        密度：<input id="fillnotes-density" value="0:1/4" /><br />
+        曲线类型：<select id="fillnotes-ease">
+          <option value="1">1 linear</option>
+          <option value="2">2 sin out</option>
+          <option value="3">3 sin in</option>
+          <option value="4">4 quad out</option>
+          <option value="5">5 quad in</option>
+          <option value="6">6 sin io</option>
+          <option value="7">7 quad io</option>
+          <option value="8">8 cubic out</option>
+          <option value="9">9 cubic in</option>
+          <option value="10">10 quart out</option>
+          <option value="11">11 quart in</option>
+          <option value="12">12 cubic io</option>
+          <option value="13">13 quart io</option>
+          <option value="14">14 quint out</option>
+          <option value="15">15 quint in</option>
+          <option value="16">16 expo out</option>
+          <option value="17">17 expo in</option>
+          <option value="18">18 circ out</option>
+          <option value="19">19 circ in</option>
+          <option value="20">20 back out</option>
+          <option value="21">21 back in</option>
+          <option value="22">22 circ in</option>
+          <option value="23">23 back io</option>
+          <option value="24">24 elastic out</option>
+          <option value="25">25 elastic in</option>
+          <option value="26">26 bounce out</option>
+          <option value="27">27 bounce in</option>
+          <option value="28">28 bounce io</option></select
+        ><br />
+        <button id="fillnotes">确认</button>
+      </div>
+    </div>
+    <div class="window" id="window-bpmlist">
+      <div class="content" style="overflow-y: auto">
+        <h2 style="margin-top: 0px; margin-left: 5px">BPM 管理</h2>
+        <button
+          class="close-btn"
+          onclick="this.parentNode.parentNode.style.display = 'none'"
+        >
+          &times;
+        </button>
+        <div id="bpmlist"></div>
+        <button id="bpmlist-add">添加</button>
+      </div>
+    </div>
+    <div class="window" id="window-help">
+      <div class="content" style="overflow-y: auto">
+        <h2 style="margin-top: 0px; margin-left: 5px">帮助页面</h2>
+        <button
+          class="close-btn"
+          onclick="this.parentNode.parentNode.style.display = 'none'"
+        >
+          &times;
+        </button>
+        <div id="help-content"></div>
+      </div>
+    </div>
+    <div id="contextmenu">
+      <div id="contextmenu-toTap">to Tap</div>
+      <div id="contextmenu-toDrag">to Drag</div>
+      <div id="contextmenu-toFlick">to Flick</div>
+      <div id="contextmenu-filp">绕 y 轴翻转</div>
+    </div>
+    <style>
+      /* 弹出窗口 */
+      .window {
+        background: #0009;
+        z-index: 114514;
+        width: 100%;
+        height: 100%;
+        /* 居中 */
+        display: none;
+        justify-content: center;
+        align-items: center;
+        /* 定位 */
+        position: fixed;
+        left: 0px;
+        top: 0px;
+      }
 
-			</div>
-		</div>
-	</div>
-	<div id="contextmenu">
-		<div id="contextmenu-toTap">to Tap</div>
-		<div id="contextmenu-toDrag">to Drag</div>
-		<div id="contextmenu-toFlick">to Flick</div>
-		<div id="contextmenu-filp">绕 y 轴翻转</div>
-	</div>
-	<style>
-		/* 弹出窗口 */
-		.window {
-			background: #0009;
-			z-index: 114514;
-			width: 100%;
-			height: 100%;
-			/* 居中 */
-			display: none;
-			justify-content: center;
-			align-items: center;
-			/* 定位 */
-			position: fixed;
-			left: 0px;
-			top: 0px;
-		}
+      .window > h2 {
+        -webkit-user-select: none;
+        user-select: none;
+      }
 
-		.window>h2 {
-			-webkit-user-select: none;
-			user-select: none;
-		}
+      .content {
+        background: #fff;
+        padding: 10px;
+        /* 定位 */
+        position: relative;
+        width: 61.8%;
+        height: 61.8%;
+      }
 
-		.content {
-			background: #FFF;
-			padding: 10px;
-			/* 定位 */
-			position: relative;
-			width: 61.8%;
-			height: 61.8%;
-		}
+      .close-btn {
+        font-size: 20px;
+        font-weight: bold;
+        padding: 0 10px;
+        cursor: pointer;
+        border: none;
+        background: none;
+        transition: all 0.2s ease;
+        /* 定位 */
+        position: absolute;
+        top: 0;
+        right: 0;
+      }
 
-		.close-btn {
-			font-size: 20px;
-			font-weight: bold;
-			padding: 0 10px;
-			cursor: pointer;
-			border: none;
-			background: none;
-			transition: all 0.2s ease;
-			/* 定位 */
-			position: absolute;
-			top: 0;
-			right: 0;
-		}
+      .close-btn:hover {
+        background: rgb(255, 217, 217);
+      }
 
-		.close-btn:hover {
-			background: rgb(255, 217, 217);
-		}
+      /* 主菜单 */
+      .menu {
+        padding: 10px;
+        border-radius: 3px;
+        background: #eee;
+        -webkit-user-select: none;
+        user-select: none;
+        z-index: 1;
+        width: 50px;
+        text-align: center;
+      }
 
-		/* 主菜单 */
-		.menu {
-			padding: 10px;
-			border-radius: 3px;
-			background: #EEE;
-			-webkit-user-select: none;
-			user-select: none;
-			z-index: 1;
-			width: 50px;
-			text-align: center;
-		}
+      .menu > div {
+        display: none;
+        position: absolute;
+        background: #eee;
+        padding: 10px;
+        border-radius: 3px;
+        transition: 0.2s ease;
+      }
 
-		.menu>div {
-			display: none;
-			position: absolute;
-			background: #EEE;
-			padding: 10px;
-			border-radius: 3px;
-			transition: .2s ease;
-		}
+      .menu > div > div {
+        margin-top: 10px;
+      }
 
-		.menu>div>div {
-			margin-top: 10px;
-		}
+      .menu:hover > div {
+        display: block;
+      }
 
-		.menu:hover>div {
-			display: block;
-		}
+      /* 下载提示 */
+      #downloading {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: auto;
+        padding: 10px;
+        z-index: 1919810;
+        display: none;
+        background: #b5ffb1;
+      }
 
-		/* 下载提示 */
-		#downloading {
-			position: fixed;
-			left: 0;
-			top: 0;
-			width: 100%;
-			height: auto;
-			padding: 10px;
-			z-index: 1919810;
-			display: none;
-			background: #b5ffb1;
-		}
+      /* 修改操作模式 */
+      #mode {
+        width: 100%;
+        height: 50px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+      }
 
-		/* 修改操作模式 */
-		#mode {
-			width: 100%;
-			height: 50px;
-			margin-top: 10px;
-			margin-bottom: 10px;
-		}
+      body {
+        touch-action: pan-x pan-y manipulation;
+        /* 允许缩放和拖动，但禁用滚动 */
+        overflow: hidden;
+        /* 隐藏溢出的内容 */
+      }
 
-		body {
-			touch-action: pan-x pan-y manipulation;
-			/* 允许缩放和拖动，但禁用滚动 */
-			overflow: hidden;
-			/* 隐藏溢出的内容 */
-		}
+      /* 时间层级选项 */
+      .eventlayer-btn {
+        border: 1px solid #000;
+        padding: 5px;
+        border-radius: 3px;
+        margin: 1px 1px 1px 1px;
+        -webkit-user-select: none;
+        user-select: none;
+        height: 20px;
+        margin-top: 10px;
+      }
 
-		/* 时间层级选项 */
-		.eventlayer-btn {
-			border: 1px solid #000;
-			padding: 5px;
-			border-radius: 3px;
-			margin: 1px 1px 1px 1px;
-			-webkit-user-select: none;
-			user-select: none;
-			height: 20px;
-			margin-top: 10px;
-		}
+      select {
+        -webkit-user-select: none;
+        user-select: none;
+      }
 
-		select {
-			-webkit-user-select: none;
-			user-select: none;
-		}
+      /* 触控模式 */
+      #mode > img {
+        margin-left: 3px;
+      }
 
-		/* 触控模式 */
-		#mode>img {
-			margin-left: 3px;
-		}
+      /* bpm list */
+      .bpmlist-show {
+        margin: 5px 5px 5px 5px;
+        display: flex;
+        border: 1px solid #bbb;
+        padding: 10px;
+      }
 
-		/* bpm list */
-		.bpmlist-show {
-			margin: 5px 5px 5px 5px;
-			display: flex;
-			border: 1px solid #BBB;
-			padding: 10px;
-		}
+      .bpmlist-show > input {
+        height: 15px;
+      }
 
-		.bpmlist-show>input {
-			height: 15px;
-		}
+      /* 下拉框 */
+      #line-selector {
+        -webkit-user-select: none;
+        user-select: none;
+      }
 
-		/* 下拉框 */
-		#line-selector {
-			-webkit-user-select: none;
-			user-select: none;
-		}
+      #line-selected {
+        border: 1px solid;
+        padding: 5px;
+      }
 
-		#line-selected {
-			border: 1px solid;
-			padding: 5px;
-		}
+      ul {
+        display: block;
+        position: absolute;
+        background: rgb(255, 255, 255);
+        margin-top: 0px;
+        border: 1px solid;
+        overflow: auto;
+        max-height: 70%;
+        list-style: none;
+        padding: 0px;
+      }
 
-		ul {
-			display: block;
-			position: absolute;
-			background: rgb(255, 255, 255);
-			margin-top: 0px;
-			border: 1px solid;
-			overflow: auto;
-			max-height: 70%;
-			list-style: none;
-			padding: 0px;
-		}
+      li {
+        border: 1px solid;
+        padding: 5px;
+        transition: 0.2s ease;
+        -webkit-user-select: none;
+        user-select: none;
+      }
 
-		li {
-			border: 1px solid;
-			padding: 5px;
-			transition: .2s ease;
-			-webkit-user-select: none;
-			user-select: none;
-		}
+      li:hover {
+        background-color: #ddd;
+      }
 
-		li:hover {
-			background-color: #DDD;
-		}
+      /* 滚动条 */
+      #scrollbar {
+        height: 30px;
+        width: 12px;
+        background: #aaa;
+      }
 
-		/* 滚动条 */
-		#scrollbar {
-			height: 30px;
-			width: 12px;
-			background: #AAA;
-		}
+      #scrollbar-container {
+        width: 12px;
+        border: 1px solid #000;
+      }
 
-		#scrollbar-container {
-			width: 12px;
-			border: 1px solid #000;
-		}
-
-		/* 右键菜单 */
-		#contextmenu {
-			position: fixed;
-			z-index: 114514;
-			background: #FFF;
-			padding: 10px;
-			display: none;
-		}
-	</style>
-	<script src="./src/math.js"></script>
-	<script src="./src/note.js"></script>
-	<script src="./src/data.js"></script>
-	<script src="./src/main.js"></script>
-	<script src="./src/renderer.js"></script>
-	<script src="./src/contextmenu.js"></script>
-</body>
-
+      /* 右键菜单 */
+      #contextmenu {
+        position: fixed;
+        z-index: 114514;
+        background: #fff;
+        padding: 10px;
+        display: none;
+      }
+    </style>
+    <script src="./src/math.js"></script>
+    <script src="./src/note.js"></script>
+    <script src="./src/data.js"></script>
+    <script src="./src/main.js"></script>
+    <script src="./src/renderer.js"></script>
+    <script src="./src/contextmenu.js"></script>
+  </body>
 </html>
-
