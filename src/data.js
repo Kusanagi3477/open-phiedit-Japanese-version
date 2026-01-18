@@ -193,6 +193,7 @@ function new_judge_line() {
 
 // 格式转换
 // ============================================================================================
+
 function official_to_rpe(off) {
   console.log(off);
   let res = new_empty_data();
@@ -322,7 +323,7 @@ function official_to_rpe(off) {
               type: 2,
               visibleTime: 9999999.0,
               yOffset: 0.0,
-            })
+            }),
           );
         } else {
           line.notes.push(
@@ -338,7 +339,7 @@ function official_to_rpe(off) {
               type: [0, 1, 4, 2, 3][j.type],
               visibleTime: 9999999.0,
               yOffset: 0.0,
-            })
+            }),
           );
         }
       }
@@ -359,7 +360,7 @@ function pec_to_rpe(pec) {
     if (typeof char == "number") char = String.fromCharCode(char);
     if (char == " " || char == "\n" || char == "\r") {
       if (key != "") {
-        if (/[a-z]/.test(key[0])) (op = key), (args.length = 0);
+        if (/[a-z]/.test(key[0])) ((op = key), (args.length = 0));
         else args.push(key);
         key = "";
 
@@ -423,7 +424,7 @@ function pec_to_rpe(pec) {
             linkgroup: 0,
             start: renderer.basic_getval(
               res.judgeLineList[id].eventLayers[0].moveXEvents,
-              tob(Number(args[1]))
+              tob(Number(args[1])),
             ),
             startTime: tob(Number(args[1])),
           });
@@ -438,7 +439,7 @@ function pec_to_rpe(pec) {
             linkgroup: 0,
             start: renderer.basic_getval(
               res.judgeLineList[id].eventLayers[0].moveYEvents,
-              tob(Number(args[1]))
+              tob(Number(args[1])),
             ),
             startTime: tob(Number(args[1])),
           });
@@ -471,7 +472,7 @@ function pec_to_rpe(pec) {
             linkgroup: 0,
             start: renderer.basic_getval(
               res.judgeLineList[id].eventLayers[0].rotateEvents,
-              tob(Number(args[1]))
+              tob(Number(args[1])),
             ),
             startTime: tob(Number(args[1])),
           });
@@ -504,7 +505,7 @@ function pec_to_rpe(pec) {
             linkgroup: 0,
             start: renderer.basic_getval(
               res.judgeLineList[id].eventLayers[0].alphaEvents,
-              tob(Number(args[1]))
+              tob(Number(args[1])),
             ),
             startTime: tob(Number(args[1])),
           });
@@ -539,7 +540,7 @@ function pec_to_rpe(pec) {
               type: 2,
               visibleTime: 9999999.0,
               yOffset: 0.0,
-            })
+            }),
           );
         } else if (op.length == 2 && op[0] == "n" && args.length == 9) {
           let id = Number(args[0]);
@@ -557,7 +558,7 @@ function pec_to_rpe(pec) {
               type: Number(op[1]),
               visibleTime: 9999999.0,
               yOffset: 0.0,
-            })
+            }),
           );
         }
       }
@@ -741,7 +742,7 @@ $("m-load").addEventListener("click", () => {
           if (
             window
               .prompt(
-                "谱面文件超过 500 MB，继续读取可能出现问题，是否继续？（继续输入 Y）"
+                "谱面文件超过 500 MB，继续读取可能出现问题，是否继续？（继续输入 Y）",
               )
               .trim() == "Y"
           ) {
@@ -788,7 +789,7 @@ $("m-load").addEventListener("click", () => {
                       j++
                     ) {
                       all_data.judgeLineList[i].notes[j] = note_compress(
-                        all_data.judgeLineList[i].notes[j]
+                        all_data.judgeLineList[i].notes[j],
                       );
                     }
                   }
@@ -858,20 +859,34 @@ $("m-save").addEventListener("click", () => {
   if (in_download) return;
   in_download = 1;
   $("downloading").style.display = "block";
+  if (!all_data.META) all_data.META = {};
+  all_data.META.name = $("chart-name").value.trim();
+  all_data.META.level = $("level").value.trim();
+  all_data.META.charter = $("charter-name").value.trim();
+  all_data.META.composer = $("composer-name").value.trim();
+  all_data.META.illustration = $("illustration-name").value.trim();
+  all_data.META.id = Number($("chart-id").value);
+  all_data.META.song = $("song-name").value.trim();
+  all_data.META.background = $("background-name").value.trim();
+  console.log("META after:", all_data.META);
 
-  const saveData = JSON.parse(JSON.stringify(all_data));
+  setTimeout(() => {
+    for (let i = 0; i < all_data.judgeLineList.length; i++) {
+      const line = all_data.judgeLineList[i];
+      line.numOfNotes = line.notes ? line.notes.length : 0;
 
-  for (const line of saveData.judgeLineList) {
-    line.numOfNotes = line.notes ? line.notes.length : 0;
-    if (line.notes) {
-      line.notes = line.notes.map(n => note_extract(n));
+      if (line.notes) {
+        for (let j = 0; j < line.notes.length; j++) {
+          line.notes[j] = note_extract(line.notes[j]);
+        }
+      }
     }
-  }
 
-  FileDownload(JSON.stringify(saveData), "chart.json");
+    FileDownload(JSON.stringify(all_data), "chart.json");
 
-  in_download = 0;
-  $("downloading").style.display = "none";
+    in_download = 0;
+    $("downloading").style.display = "none";
+  }, 0);
 });
 $("m-save2").addEventListener("click", () => {
   if (in_download) return;
@@ -882,21 +897,21 @@ $("m-save2").addEventListener("click", () => {
   let n = 0;
 
   for (const line of all_data.judgeLineList) {
-    if (!line.notes) continue;
-
     n += line.notes.length;
     for (const note of line.notes) {
       const tmp = note_extract(note);
       const a = {};
 
       a.type = tmp.type === 1 || tmp.type === 3 ? 1 : tmp.type === 4 ? 2 : 3;
+
       a.st = Math.round(
         ((tmp.startTime[0] + tmp.startTime[1] / tmp.startTime[2]) /
-          (bpm / 60)) * 66.6
+          (bpm / 60)) *
+          66.6,
       );
       a.ed = Math.round(
-        ((tmp.endTime[0] + tmp.endTime[1] / tmp.endTime[2]) /
-          (bpm / 60)) * 66.6
+        ((tmp.endTime[0] + tmp.endTime[1] / tmp.endTime[2]) / (bpm / 60)) *
+          66.6,
       );
       a.x = Math.round((tmp.positionX + 675) / (1350 / shu)) + 1;
       a.speed = 50;
@@ -921,10 +936,9 @@ $("m-save2").addEventListener("click", () => {
       "\n";
   }
 
-
   FileDownload(str, "chart.que");
 
   in_download = 0;
   $("downloading").style.display = "none";
 });
-
+console.log("m-save element:", $("m-save"));
