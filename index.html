@@ -214,7 +214,7 @@
           <button id="edit4-impl">执行</button>
         </div>
       </div>
-      <div style="display: flex">
+      <div class="nowrap-row">
         bpm：
         <div
           id="s-bpm"
@@ -227,38 +227,40 @@
         >
           80
         </div>
-        &nbsp; 縦の格子数：
-        <input value="1" type="number" id="s-shu" style="width: 100px" />
-        &nbsp; 横の格子数：
-        <input value="1" type="number" id="s-heng" style="width: 100px" />
+
+        縦の格子数：
+        <input value="1" type="number" id="s-shu" />
+
+        横の格子数：
+        <input value="1" type="number" id="s-heng" />
       </div>
 
-      <!-- 2段目：譜面情報 -->
-      <div style="display: flex; margin-top: 8px">
+      <div class="nowrap-row" style="margin-top: 8px">
         譜面名：
-        <input value="" type="text" id="chart-name" style="width: 100px" />
-        &nbsp; 譜面製作者：
-        <input value="" type="text" id="charter-name" style="width: 100px" />
-        &nbsp; 作曲者名：
-        <input value="" type="text" id="composer-name" style="width: 100px" />
-        &nbsp; イラスト：
-        <input
-          value=""
-          type="text"
-          id="illustration-name"
-          style="width: 100px"
-        />
-        &nbsp; レベル：
-        <input value="" type="text" id="level" style="width: 100px" />
+        <input id="chart-name" />
+
+        譜面製作者：
+        <input id="charter-name" />
+
+        作曲者名：
+        <input id="composer-name" />
+
+        イラスト：
+        <input id="illustration-name" />
+
+        レベル：
+        <input id="level" />
       </div>
 
-      <div style="display: flex; margin-top: 4px">
+      <div class="nowrap-row" style="margin-top: 4px">
         音源：
-        <input value="" type="text" id="song-name" style="width: 100px" />
-        &nbsp; 背景：
-        <input value="" type="text" id="background-name" style="width: 100px" />
-        &nbsp; id：
-        <input value="" type="number" id="chart-id" style="width: 100px" />
+        <input id="song-name" />
+
+        背景：
+        <input id="background-name" />
+
+        id：
+        <input id="chart-id" type="number" />
       </div>
     </div>
     <div class="window" id="window-fillnotes">
@@ -362,6 +364,27 @@
         left: 0px;
         top: 0px;
       }
+      /* スマホで勝手に改行させない */
+      .nowrap-row {
+        display: flex;
+        flex-wrap: nowrap; /* 重要：折り返さない */
+        white-space: nowrap; /* 文字も改行禁止 */
+        gap: 6px;
+        align-items: center;
+        overflow-x: auto; /* 入りきらない時は横スクロール */
+        padding-bottom: 4px;
+      }
+
+      /* 入力の最小幅を確保 */
+      .nowrap-row input {
+        min-width: 80px;
+      }
+
+      /* ラベル部分 */
+      .nowrap-row > span,
+      .nowrap-row > div {
+        flex-shrink: 0;
+      }
 
       .window > h2 {
         -webkit-user-select: none;
@@ -447,9 +470,8 @@
 
       body {
         touch-action: pan-x pan-y manipulation;
-        /* 允许缩放和拖动，但禁用滚动 */
-        overflow: hidden;
-        /* 隐藏溢出的内容 */
+        overflow-x: auto; /* 横スクロール許可 */
+        overflow-y: auto; /* 縦スクロール許可 ← 重要 */
       }
 
       /* 时间层级选项 */
@@ -540,6 +562,20 @@
         background: #fff;
         padding: 10px;
         display: none;
+      }
+      @media screen and (max-width: 768px) {
+        body {
+          font-size: 14px;
+        }
+
+        input {
+          font-size: 16px; /* iOSの勝手ズーム対策 */
+        }
+
+        .menu {
+          width: auto; /* 50px固定が狭すぎる */
+          padding: 8px 6px;
+        }
       }
     </style>
     <script src="./src/math.js"></script>
