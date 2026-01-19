@@ -385,6 +385,28 @@
       .nowrap-row > div {
         flex-shrink: 0;
       }
+      .nowrap-row {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+
+        overflow-x: auto !important;
+        overflow-y: visible !important;
+
+        -webkit-overflow-scrolling: touch !important;
+
+        touch-action: pan-x !important;
+      }
+
+      .nowrap-row > * {
+        flex-shrink: 0 !important;
+      }
+
+      /* iOS対策 */
+      @supports (-webkit-touch-callout: none) {
+        .nowrap-row {
+          cursor: grab;
+        }
+      }
 
       .window > h2 {
         -webkit-user-select: none;
