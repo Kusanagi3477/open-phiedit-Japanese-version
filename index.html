@@ -151,7 +151,7 @@
           終了值：<input id="edit2-ed" /><br />
         </div>
         <div style="width: 25%; display: block" id="edit3">
-          <h3>判定線編集</h3>
+          <h3>　</h3>
           名称：<input id="edit3-name" /><br />
           親ライン：<input id="edit3-fa" type="number" /><br />
           bpm倍率：<input id="edit3-bpmfactor" type="number" /><br />
@@ -374,6 +374,11 @@
         overflow-x: auto; /* 入りきらない時は横スクロール */
         padding-bottom: 4px;
       }
+      .nowrap-row {
+        position: relative;
+        z-index: 10; /* キャンバスより上に */
+        touch-action: pan-x !important;
+      }
 
       /* 入力の最小幅を確保 */
       .nowrap-row input {
@@ -512,6 +517,23 @@
         -webkit-user-select: none;
         user-select: none;
       }
+      #edit,
+      #edit2,
+      #edit3,
+      #edit4 {
+        overscroll-behavior: contain;
+        touch-action: pan-y;
+      }
+
+      /* キャンバスは完全に別扱い！ */
+      #cvs {
+        touch-action: none; /* ← ここ超重要 */
+      }
+
+      /* スクロールエリア */
+      #mainUI {
+        overscroll-behavior: none; /* 外側は余計に動かさない */
+      }
 
       /* 触控模式 */
       #mode > img {
@@ -606,5 +628,45 @@
     <script src="./src/main.js"></script>
     <script src="./src/renderer.js"></script>
     <script src="./src/contextmenu.js"></script>
+    <!-- ===== ここから：横スクロール保護（追加のみ） ===== -->
+    <style>
+      /* キャンバスが操作を横取りしない */
+      #cvs {
+        touch-action: none !important;
+      }
+
+      /* nowrap-rowを最優先で横スクロールさせる */
+      .nowrap-row {
+        touch-action: pan-x !important;
+        position: relative !important;
+        z-index: 9999 !important;
+      }
+    </style>
+
+    <script>
+      // nowrap-rowの操作をキャンバスに渡さない（追加処理）
+      document.querySelectorAll(".nowrap-row").forEach((row) => {
+        row.addEventListener(
+          "touchstart",
+          (e) => {
+            e.stopPropagation();
+          },
+          { passive: true },
+        );
+
+        row.addEventListener(
+          "touchmove",
+          (e) => {
+            e.stopPropagation();
+          },
+          { passive: true },
+        );
+
+        row.addEventListener("pointerdown", (e) => {
+          e.stopPropagation();
+        });
+      });
+    </script>
+    <!-- ===== ここまで追加 ===== -->
   </body>
 </html>
