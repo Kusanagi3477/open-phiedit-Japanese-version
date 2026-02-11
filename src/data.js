@@ -855,39 +855,27 @@ $("m-load").addEventListener("click", () => {
     }
   };
 });
-$("m-save").addEventListener("click", () => {
-  if (in_download) return;
-  in_download = 1;
-  $("downloading").style.display = "block";
-  if (!all_data.META) all_data.META = {};
-  all_data.META.name = $("chart-name").value.trim();
-  all_data.META.level = $("level").value.trim();
-  all_data.META.charter = $("charter-name").value.trim();
-  all_data.META.composer = $("composer-name").value.trim();
-  all_data.META.illustration = $("illustration-name").value.trim();
-  all_data.META.id = Number($("chart-id").value);
-  all_data.META.song = $("song-name").value.trim();
-  all_data.META.background = $("background-name").value.trim();
-  console.log("META after:", all_data.META);
 
-  setTimeout(() => {
-    for (let i = 0; i < all_data.judgeLineList.length; i++) {
-      const line = all_data.judgeLineList[i];
-      line.numOfNotes = line.notes ? line.notes.length : 0;
+/* =========================
+   SAVE EXPORT
+   ========================= */
 
-      if (line.notes) {
-        for (let j = 0; j < line.notes.length; j++) {
-          line.notes[j] = note_extract(line.notes[j]);
-        }
+document.getElementById("m-save").onclick = () => {
+  const saveData = structuredClone(all_data);
+
+  for (let line of saveData.judgeLineList) {
+    line.numOfNotes = line.notes?.length ?? 0;
+    if (line.notes) {
+      for (let j = 0; j < line.notes.length; j++) {
+        line.notes[j] = note_extract(line.notes[j]);
       }
     }
+  }
 
-    FileDownload(JSON.stringify(all_data), "chart.json");
+  FileDownload(JSON.stringify(saveData), "chart.json");
+  saveChartToDB();
+};
 
-    in_download = 0;
-    $("downloading").style.display = "none";
-  }, 0);
-});
 $("m-save2").addEventListener("click", () => {
   if (in_download) return;
   in_download = 1;
@@ -903,7 +891,6 @@ $("m-save2").addEventListener("click", () => {
       const a = {};
 
       a.type = tmp.type === 1 || tmp.type === 3 ? 1 : tmp.type === 4 ? 2 : 3;
-
       a.st = Math.round(
         ((tmp.startTime[0] + tmp.startTime[1] / tmp.startTime[2]) /
           (bpm / 60)) *
@@ -941,4 +928,190 @@ $("m-save2").addEventListener("click", () => {
   in_download = 0;
   $("downloading").style.display = "none";
 });
-console.log("m-save element:", $("m-save"));
+
+/* =========================
+   IndexedDB AUTOSAVE SYSTEM
+   ========================= */
+
+const DB_NAME = "phiedit_db";
+const STORE_NAME = "charts";
+const DB_VERSION = 1;
+
+let globalDB = null;
+
+// open DB
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME);
+      }
+    };
+
+    req.onsuccess = () => {
+      globalDB = req.result;
+      resolve(globalDB);
+    };
+
+    req.onerror = () => reject(req.error);
+  });
+}
+
+// close DB
+async function closeDB() {
+  if (globalDB) {
+    globalDB.close();
+    globalDB = null;
+  }
+}
+
+// save
+async function saveChartToDB() {
+  const db = await openDB();
+  const tx = db.transaction(STORE_NAME, "readwrite");
+  const store = tx.objectStore(STORE_NAME);
+
+  const copy = structuredClone(all_data);
+  store.put(copy, "autosave");
+
+  console.log("autosave saved");
+}
+
+// load
+async function loadChartFromDB() {
+  const db = await openDB();
+  const tx = db.transaction(STORE_NAME, "readonly");
+  const store = tx.objectStore(STORE_NAME);
+
+  return new Promise((resolve) => {
+    const req = store.get("autosave");
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => resolve(null);
+  });
+}
+
+/* =========================
+   RESET (完全削除)
+   ========================= */
+
+document.getElementById("reset-db").onclick = async () => {
+  if (!confirm("譜面データを完全削除しますか？")) return;
+
+  clearInterval(window.autosaveTimer);
+  await closeDB();
+
+  await new Promise((resolve) => {
+    const req = indexedDB.deleteDatabase(DB_NAME);
+    req.onsuccess = resolve;
+    req.onerror = resolve;
+    req.onblocked = () => {
+      alert("DBが使用中です。ページを再読み込みします");
+      resolve();
+    };
+  });
+
+  alert("完全リセット完了");
+  location.reload(); // ←これ超重要
+};
+
+/* =========================
+   META DATA (曲名など)
+   ========================= */
+
+function initMeta() {
+  if (!all_data.META) {
+    all_data.META = {
+      RPEVersion: 150,
+      background: "",
+      charter: "",
+      composer: "",
+      duration: 0,
+      id: "",
+      illustration: "",
+      level: "0",
+      name: "",
+      offset: 0,
+      song: "",
+    };
+  }
+}
+
+function bindMetaInputs() {
+  const bind = (id, key) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("input", () => {
+      all_data.META[key] = el.value;
+    });
+  };
+
+  bind("chart-name", "name");
+  bind("charter-name", "charter");
+  bind("composer-name", "composer");
+  bind("illustration-name", "illustration");
+  bind("level", "level");
+  bind("song-name", "song");
+  bind("background-name", "background");
+  bind("chart-id", "id");
+}
+
+function loadMetaToInputs() {
+  if (!all_data.META) return;
+
+  const set = (id, key) => {
+    const el = document.getElementById(id);
+    if (el) el.value = all_data.META[key] ?? "";
+  };
+
+  set("chart-name", "name");
+  set("charter-name", "charter");
+  set("composer-name", "composer");
+  set("illustration-name", "illustration");
+  set("level", "level");
+  set("song-name", "song");
+  set("background-name", "background");
+  set("chart-id", "id");
+}
+
+/* =========================
+   SAFE change_line
+   ========================= */
+
+function safeChangeLine(i) {
+  if (!window.change_line) return;
+  if (!$("lines") || !$("lines").children || !$("lines").children[i]) return;
+  change_line(i);
+}
+
+/* =========================
+   LOAD AUTOSAVE ON START
+   ========================= */
+
+window.addEventListener("load", async () => {
+  const data = await loadChartFromDB();
+
+  if (data) {
+    console.log("IndexedDB autosave loaded");
+    all_data = data;
+    fix();
+    initMeta();
+    loadMetaToInputs();
+    bindMetaInputs();
+    setTimeout(() => safeChangeLine(0), 1000);
+  } else {
+    initMeta();
+    bindMetaInputs();
+  }
+});
+
+/* =========================
+   AUTOSAVE TIMER
+   ========================= */
+
+window.autosaveTimer = setInterval(() => {
+  if (!all_data || !all_data.judgeLineList) return;
+  saveChartToDB();
+}, 5000);
